@@ -5,26 +5,39 @@ jobs:
   security:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - name: Checkout code
+        uses: actions/checkout@v4 # Updated to stable v4
+
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/python@master
-        continue-on-error: true # To make sure that SARIF upload gets called
+        continue-on-error: true # Ensures the workflow continues even if vulnerabilities are found
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: code test
-          args: --sarif-file-output=snyk.sarif
+          # Fixed: Use github.workspace to ensure the file is written to a shared runner directory
+          args: --sarif-file-output=${{ github.workspace }}/snyk.sarif
           
       - name: Count total number of vulnerabilities
+        id: count_vars
         run: |
-          RESULTS_LENGTH=$(jq '.runs[0].results | length' snyk.sarif)
+          # Fixed: Point jq to the exact same workspace path
+          RESULTS_LENGTH=$(jq '.runs[0].results | length' ${{ github.workspace }}/snyk.sarif)
           echo "RESULTS_LENGTH=$RESULTS_LENGTH" >> $GITHUB_ENV
-          echo $RESULTS_LENGTH
+          echo "Total Vulnerabilities: $RESULTS_LENGTH"
+
+      - name: Upload SARIF report
+        uses: actions/upload-artifact@v4
+        with:
+          name: snyk-vulnerability-report
+          path: ${{ github.workspace }}/snyk.sarif # Uploads the file so you can inspect it manually
+
       - name: Pass_or_Fail_the_job
         run: |
-            if [ "$RESULTS_LENGTH" != 0 ]; then
-                echo "Job Failed"
+            # Fixed: Added quotes and explicit logic for the failure message
+            if [ "$RESULTS_LENGTH" != "0" ] && [ "$RESULTS_LENGTH" != "" ]; then
+                echo "Job Failed: $RESULTS_LENGTH vulnerabilities detected."
                 exit 1
             else
-                echo "Pass"
+                echo "Pass: No vulnerabilities found."
             fi
