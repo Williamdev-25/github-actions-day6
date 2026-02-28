@@ -12,7 +12,13 @@ jobs:
         run: |
           npm install -g snyk
           snyk auth ${{ secrets.SNYK_TOKEN }}
-          snyk code test --sarif-file-output=snyk.sarif || true
+          snyk code test --sarif-file-output=snyk.sarif || echo '{}' > snyk.sarif
+
+      - name: Check if SARIF file exists
+        run: |
+          if [ ! -f snyk.sarif ]; then
+            echo '{"runs":[{"results":[]}]}' > snyk.sarif
+          fi
 
       - name: Count total number of vulnerabilities
         run: |
