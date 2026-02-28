@@ -11,24 +11,24 @@ jobs:
         run: npm install -g snyk
 
       - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@master
+        # Using the CLI directly ensures the SARIF file is created in the current workspace
+        run: snyk test --sarif-file-output=snyk.sarif
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --sarif-file-output=snyk.sarif
 
       - name: Count total number of vulnerabilities
         run: |
+          # The file snyk.sarif will now exist in the root directory
           RESULTS_LENGTH=$(jq '.runs[0].results | length' snyk.sarif)
           echo "RESULTS_LENGTH=$RESULTS_LENGTH" >> $GITHUB_ENV
-          echo $RESULTS_LENGTH
+          echo "Total Vulnerabilities: $RESULTS_LENGTH"
 
       - name: Pass_or_Fail_the_job
         run: |
           if [ "$RESULTS_LENGTH" != "0" ]; then
-            echo "Job Failed"
+            echo "Job Failed due to $RESULTS_LENGTH vulnerabilities."
             exit 1
           else
-            echo "Pass"
+            echo "Pass: No vulnerabilities found."
           fi
