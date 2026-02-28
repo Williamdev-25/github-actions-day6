@@ -11,9 +11,12 @@ jobs:
         run: npm install -g snyk
 
       - name: Run Snyk to check for vulnerabilities
-        run: snyk code test --sarif-file-output=snyk.sarif || true
+        uses: snyk/actions/node@master
+        continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --sarif-file-output=snyk.sarif
 
       - name: Count total number of vulnerabilities
         run: |
