@@ -1,6 +1,3 @@
-🟨 Example 1: test1.py
-
-
 import requests
 
 # Hardcoded sensitive data (API Key)
@@ -15,4 +12,3 @@ if response.status_code == 200:
 else:
     print("Failed to fetch data")
 
-# end of script
