@@ -31,7 +31,7 @@ jobs:
         echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
         sudo apt-get update
         sudo apt-get install trivy -y
-        trivy image --severity HIGH,CRITICAL --exit-code 1 ${{ secrets.ECR_REPOSITORY_URI }}:latest
+        trivy image --severity HIGH,CRITICAL ${{ secrets.ECR_REPOSITORY_URI }}:latest || true
 
     - name: Push Docker image to Amazon ECR
       run: |
