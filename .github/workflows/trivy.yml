@@ -26,12 +26,12 @@ jobs:
         docker build -t ${{ secrets.ECR_REPOSITORY_URI }}:latest .
 
     - name: Scan Docker image for vulnerabilities with Trivy
-      uses: aquasecurity/trivy-action@0.28.0
-      with:
-        image-ref: ${{ secrets.ECR_REPOSITORY_URI }}:latest
-        format: table
-        severity: HIGH,CRITICAL
-        exit-code: 1
+      run: |
+        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+        echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+        sudo apt-get update
+        sudo apt-get install trivy -y
+        trivy image --severity HIGH,CRITICAL --exit-code 1 ${{ secrets.ECR_REPOSITORY_URI }}:latest
 
     - name: Push Docker image to Amazon ECR
       run: |
