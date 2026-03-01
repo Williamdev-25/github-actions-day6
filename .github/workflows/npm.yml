@@ -1,5 +1,3 @@
-🟨 Example GitHub Action for npm audit:
-
 name: npm Audit Security Check
 
 on: [push]
