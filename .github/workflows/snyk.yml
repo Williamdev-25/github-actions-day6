@@ -1,38 +1,38 @@
-name: Example workflow for Python script scan using Snyk
-on: push
+# name: Example workflow for Python script scan using Snyk
+# on: push
 
-jobs:
-  security:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
+# jobs:
+#   security:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@master
 
-      - name: Run Snyk to check for vulnerabilities
-        continue-on-error: true
-        run: |
-          npm install -g snyk
-          snyk auth ${{ secrets.SNYK_TOKEN }}
-          snyk code test --sarif-file-output=snyk.sarif || echo '{}' > snyk.sarif
+#       - name: Run Snyk to check for vulnerabilities
+#         continue-on-error: true
+#         run: |
+#           npm install -g snyk
+#           snyk auth ${{ secrets.SNYK_TOKEN }}
+#           snyk code test --sarif-file-output=snyk.sarif || echo '{}' > snyk.sarif
 
      
 
-      - name: Check if SARIF file exists
-        run: |
-          if [ ! -f snyk.sarif ]; then
-            echo '{"runs":[{"results":[]}]}' > snyk.sarif
-          fi
+#       - name: Check if SARIF file exists
+#         run: |
+#           if [ ! -f snyk.sarif ]; then
+#             echo '{"runs":[{"results":[]}]}' > snyk.sarif
+#           fi
 
-      - name: Count total number of vulnerabilities
-        run: |
-          RESULTS_LENGTH=$(jq '.runs[0].results | length' snyk.sarif)
-          echo "RESULTS_LENGTH=$RESULTS_LENGTH" >> $GITHUB_ENV
-          echo $RESULTS_LENGTH
+#       - name: Count total number of vulnerabilities
+#         run: |
+#           RESULTS_LENGTH=$(jq '.runs[0].results | length' snyk.sarif)
+#           echo "RESULTS_LENGTH=$RESULTS_LENGTH" >> $GITHUB_ENV
+#           echo $RESULTS_LENGTH
 
-      - name: Pass_or_Fail_the_job
-        run: |
-          if [ "$RESULTS_LENGTH" != 0 ]; then
-            echo "Job Failed"
-            exit 1
-          else
-            echo "Pass"
-          fi
+#       - name: Pass_or_Fail_the_job
+#         run: |
+#           if [ "$RESULTS_LENGTH" != 0 ]; then
+#             echo "Job Failed"
+#             exit 1
+#           else
+#             echo "Pass"
+#           fi
